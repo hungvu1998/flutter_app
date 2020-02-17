@@ -7,6 +7,8 @@ import 'package:flutter_app/src/widget/profile_clipper.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import 'conversation_item.dart';
+
 class ChatPage extends StatefulWidget {
   final UserModel userModel;
 
@@ -16,8 +18,9 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  String idFriend ;
+
   final Firestore nodeRoot = Firestore.instance;
+  bool _isSearch=false;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -48,10 +51,13 @@ class _ChatPageState extends State<ChatPage> {
                       if(!snapshotChat.hasData){
                         return  Container();
                       }
-                      else
+                      else{
                         return ConversationItem(
-
+                          datas: snapshotChat.data.documents[0],
+                          idChat:  widget.userModel.idChat[index-2].toString(),
                         );
+                      }
+
                     },
 
                   );
@@ -165,6 +171,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
           ),
+          _isSearch ?
           Flexible(
             flex: 1,
             child: Padding(
@@ -174,11 +181,11 @@ class _ChatPageState extends State<ChatPage> {
 
                 },
                 child: Text(
-                  "Huỷ"
+                  "Hủy"
                 ),
               ),
             ),
-          )
+          ) : Container()
         ],
       ),
 
@@ -204,18 +211,5 @@ class _ChatPageState extends State<ChatPage> {
 
 
 
-  Future<String> _getIDfriend(datas){
 
-    await for(var item in datas){
-      if(item.data["idTo"].toString()!= authBloc.userCurrent.uid){
-        idFriend= item.data["idTo"].toString();
-        break;
-      }
-
-      if(item.data["idFrom"].toString()!=authBloc.userCurrent.uid){
-        idFriend= item.data["idFrom"].toString();
-        break;
-      }
-    }
-  }
 }
