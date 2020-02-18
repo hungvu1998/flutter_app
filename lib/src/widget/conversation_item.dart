@@ -8,7 +8,8 @@ import 'detail_chat.dart';
 class ConversationItem extends StatefulWidget {
   final DocumentSnapshot datas;
   final String idChat;
-  const ConversationItem({Key key, this.datas,this.idChat}) : super(key: key);
+  final List<String> listIdChat;
+  const ConversationItem({Key key, this.datas,this.idChat,this.listIdChat}) : super(key: key);
   @override
   _ConversationItemState createState() => _ConversationItemState();
 }
@@ -34,11 +35,13 @@ class _ConversationItemState extends State<ConversationItem> {
        onTap: (){
          if(_urlImg!=null&& _friendName!=null && _isActive!=null){
            Navigator.push(context, MaterialPageRoute(
-               builder: (context) => DetailChatPage(
+               builder: (context) => ChatDetail(
                  urlImg: _urlImg,
                  friendName: _friendName,
                  isActive: _isActive,
                  idChat: widget.idChat,
+                 idFriend: idFriend,
+                 listIdChat: widget.listIdChat,
                )
            ));
          }

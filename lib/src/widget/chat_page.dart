@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/src/bloc/auth_bloc.dart';
 import 'package:flutter_app/src/model/user_model.dart';
@@ -18,9 +19,32 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-
+  FirebaseMessaging _firebaseMessaging =  new FirebaseMessaging();
   final Firestore nodeRoot = Firestore.instance;
   bool _isSearch=false;
+
+  @override
+  void initState() {
+    setUpNotification();
+    super.initState();
+  }
+
+  void setUpNotification() async {
+    _firebaseMessaging.getToken().then((token){
+      nodeRoot.collection('users').document(authBloc.userCurrent.uid).updateData({'token': token});
+    });
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async{
+        print("Message: $message");
+      },
+      onResume: (Map<String, dynamic> message) async{
+        print("Message: $message");
+      },
+      onLaunch: (Map<String, dynamic> message) async{
+        print("Message: $message");
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -55,6 +79,7 @@ class _ChatPageState extends State<ChatPage> {
                         return ConversationItem(
                           datas: snapshotChat.data.documents[0],
                           idChat:  widget.userModel.idChat[index-2].toString(),
+                          listIdChat: widget.userModel.idChat,
                         );
                       }
 

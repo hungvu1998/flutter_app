@@ -4,15 +4,17 @@ class UserModel {
   String name;
   List<String> idChat;
   bool isActive;
+  String token;
 
-  UserModel({this.id, this.imageAvatarUrl, this.name,this.idChat,this.isActive});
+  UserModel({this.id, this.imageAvatarUrl, this.name,this.idChat,this.isActive,this.token});
   Map<String, dynamic> toJson() =>
       {
         'id': id,
         'imageAvatarUrl': imageAvatarUrl,
         'name':name,
         'idChat':idChat,
-        'isActive':isActive
+        'isActive':isActive,
+        'token' : token
       };
 //  UserModel.fromMap(Map snapshot,String id) :
 //        id = id ?? '',
