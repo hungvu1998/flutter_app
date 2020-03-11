@@ -9,12 +9,17 @@ final chatBloc = ChatBloc();
 class ChatBloc {
   var _searchValController = BehaviorSubject<String>();
   var _chatMessageValController = BehaviorSubject<String>();
+  var _countFindUserController = BehaviorSubject<int>();
+
+
 
   Function(String) get feedSearchVal => _searchValController.sink.add;
   Function(String) get feedMessageVal => _chatMessageValController.sink.add;
+  Function(int) get feedCounFindUser => _countFindUserController.sink.add;
 
   Stream<String> get recieveSearchVal => _searchValController.stream;
   Stream<String> get recieveChatMessageVal => _chatMessageValController.stream;
+  Stream<int> get recieveCountFindUser => _countFindUserController.stream;
 
   var nodeRoot = Firestore.instance;
 
@@ -33,10 +38,39 @@ class ChatBloc {
           idChat: value.documents[0]['idChat'].cast<String>(),
           isActive: value.documents[0]['isActive'],
           imageAvatarUrl:  value.documents[0]['imageAvatarUrl']);
-      _userController.add(userModel);
+      //_userController.add(userModel);
     });
     return userModel;
   }
+
+
+  Future<UserModel> searchUser(String key) async{
+
+    await nodeRoot.collection('users').where("name", isLessThanOrEqualTo: key ).limit(20).orderBy('name',descending: true).getDocuments().then((value){
+      if(value.documents.length<=0){
+        feedCounFindUser(value.documents.length);
+      }
+      else{
+        for(var item in value.documents){
+          var userModel= new UserModel(
+              id: item['id'],
+              name: item['name'],
+              // listFriend: value.documents[0]['listFriend'].cast<String>(),
+              idChat: item['idChat'].cast<String>(),
+              isActive: item['isActive'],
+              imageAvatarUrl:  item['imageAvatarUrl']);
+          _userController.add(userModel);
+        }
+      }
+
+    });
+
+  }
+
+
+
+
+
 
 //  List<List<StoryItem>> listStories ;
 //  List<UserModel> friendList = new List();
@@ -87,7 +121,7 @@ class ChatBloc {
     //_storiesController?.close();
     _chatMessageValController?.close();
     _searchValController?.close();
-
+    _countFindUserController?.close();
     _userController?.close();
   }
 }
