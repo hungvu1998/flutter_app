@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/main.dart';
 import 'package:flutter_app/src/utlis/app_theme.dart';
 import 'package:flutter_app/src/widget/detail_chat.dart';
 import 'package:flutter_app/src/widget/home_screen.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_app/src/widget/splash_screen.dart';
 
 var routes = <String, WidgetBuilder>{
   "/": (BuildContext context) => SplashScreen(),
+
   "/Home": (BuildContext context) => HomeScreen(),
   "/chatDetail": (BuildContext context) => ChatDetail(),
   "/profile": (BuildContext context) => Profile(),

@@ -1,11 +1,14 @@
+import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/main.dart';
 import 'package:flutter_app/src/bloc/auth_bloc.dart';
 import 'package:flutter_app/src/model/user_model.dart';
 import 'package:flutter_app/src/widget/chat_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
+
   @override
 
   _HomeScreenState createState() => _HomeScreenState();
@@ -40,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: TabBarView(
                     children: <Widget>[
                       ChatPage(
+
                         userModel: userModel,
                       ),
                       ChatPage(

@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -129,6 +130,7 @@ class _ChatPageState extends State<ChatPage> {
                           }
                           else{
                             return ConversationItem(
+
                               datas: snapshotChat.data.documents[0],
                               idChat:  widget.userModel.idChat[index-2].toString(),
                               listIdChat: widget.userModel.idChat,
@@ -160,7 +162,7 @@ class _ChatPageState extends State<ChatPage> {
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) {
                 return Profile(
-                  //imgUrl:imgs,
+                  imgUrl: widget.userModel.imageAvatarUrl,
                 );
               }));
             },

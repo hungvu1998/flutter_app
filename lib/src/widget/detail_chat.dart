@@ -1,12 +1,16 @@
 
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/src/bloc/auth_bloc.dart';
 import 'package:flutter_app/src/bloc/chat_bloc.dart';
 import 'package:flutter_app/src/model/Message.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import 'messenger_app_bar.dart';
@@ -52,7 +56,7 @@ class _ChatDetailState extends State<ChatDetail> {
         .listen((IosNotificationSettings settings) {
       print("Settings registered: $settings");
     });
-
+    focusNode.addListener(onFocusChange);
     firebaseMessaging.getToken().then((token){
 
       print('--- Firebase toke here ---');
@@ -84,6 +88,16 @@ class _ChatDetailState extends State<ChatDetail> {
       body: Container(
         decoration: BoxDecoration(color: Colors.white),
         child: WillPopScope(
+          onWillPop: () async{
+            if(isShowSticker){
+              setState(() {
+                isShowSticker=false;
+              });
+              return false;
+            }
+            else
+              return true;
+          },
           child: Stack(
             children: <Widget>[
               Column(
@@ -153,60 +167,60 @@ class _ChatDetailState extends State<ChatDetail> {
                                                   ),)
                                                     :snapshot.data.documents[index]['type'] == 2 ?(Container(
                                                     child: snapshot.data.documents[index]['content']=='like'
-                                                        ?  Image.asset('assets/icon/like.png',
+                                                        ?  Image.asset('asset/images/sticker/like.png',
                                                       width: 50.0,
                                                       height: 50.0,
                                                       fit: BoxFit.cover,)
                                                         : Image.asset(
-                                                      'assets/icon/${snapshot.data.documents[index]['content']}.gif',
+                                                      'asset/images/sticker/${snapshot.data.documents[index]['content']}.gif',
                                                       width: 100.0,
                                                       height: 100.0,
                                                       fit: BoxFit.cover,
                                                     )
                                                 )) :Container(
-//                                                  child: FlatButton(
-//                                                    child: Material(
-//                                                      child: CachedNetworkImage(
-//                                                        placeholder: (context, url) => Container(
-//                                                          child: CircularProgressIndicator(
-//                                                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xfff5a623)),
-//                                                          ),
-//                                                          width: 200.0,
-//                                                          height: 200.0,
-//                                                          padding: EdgeInsets.all(70.0),
-//                                                          decoration: BoxDecoration(
-//                                                            color: Color(0xffE8E8E8),
-//                                                            borderRadius: BorderRadius.all(
-//                                                              Radius.circular(8.0),
-//                                                            ),
-//                                                          ),
-//                                                        ),
-//                                                        errorWidget: (context, url, error) => Material(
-//                                                          child: Image.asset(
-//                                                            'assets/images/img_not_available.jpeg',
-//                                                            width: 200.0,
-//                                                            height: 200.0,
-//                                                            fit: BoxFit.cover,
-//                                                          ),
-//                                                          borderRadius: BorderRadius.all(
-//                                                            Radius.circular(8.0),
-//                                                          ),
-//                                                          clipBehavior: Clip.hardEdge,
-//                                                        ),
-//                                                        imageUrl: snapshot.data.documents[index]['content'],
-//                                                        width: 200.0,
-//                                                        height: 200.0,
-//                                                        fit: BoxFit.cover,
-//                                                      ),
-//                                                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
-//                                                      clipBehavior: Clip.hardEdge,
-//                                                    ),
-//                                                    onPressed: () {
-////                                                      Navigator.push(
-////                                                          context, MaterialPageRoute(builder: (context) => FullPhoto(url: snapshot.data.documents[index]['content'])));
-//                                                    },
-//                                                    padding: EdgeInsets.all(0),
-//                                                  ),
+                                                  child: FlatButton(
+                                                    child: Material(
+                                                      child: CachedNetworkImage(
+                                                        placeholder: (context, url) => Container(
+                                                          child: CircularProgressIndicator(
+                                                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xfff5a623)),
+                                                          ),
+                                                          width: 200.0,
+                                                          height: 200.0,
+                                                          padding: EdgeInsets.all(70.0),
+                                                          decoration: BoxDecoration(
+                                                            color: Color(0xffE8E8E8),
+                                                            borderRadius: BorderRadius.all(
+                                                              Radius.circular(8.0),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        errorWidget: (context, url, error) => Material(
+                                                          child: Image.asset(
+                                                            'assets/images/img_not_available.jpeg',
+                                                            width: 200.0,
+                                                            height: 200.0,
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                          borderRadius: BorderRadius.all(
+                                                            Radius.circular(8.0),
+                                                          ),
+                                                          clipBehavior: Clip.hardEdge,
+                                                        ),
+                                                        imageUrl: snapshot.data.documents[index]['content'],
+                                                        width: 200.0,
+                                                        height: 200.0,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                                                      clipBehavior: Clip.hardEdge,
+                                                    ),
+                                                    onPressed: () {
+//                                                      Navigator.push(
+//                                                          context, MaterialPageRoute(builder: (context) => FullPhoto(url: snapshot.data.documents[index]['content'])));
+                                                    },
+                                                    padding: EdgeInsets.all(0),
+                                                  ),
 
                                                 )
                                             ),
@@ -378,7 +392,7 @@ class _ChatDetailState extends State<ChatDetail> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(6.0),
+                    padding: EdgeInsets.only(top:10,right: 10),
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: InkWell(
@@ -419,8 +433,6 @@ class _ChatDetailState extends State<ChatDetail> {
                 else
                   return IconButton(
                     onPressed: (){
-
-
                       _sendMessage("like", 2);
                     },
                     icon: Icon(
@@ -448,7 +460,7 @@ class _ChatDetailState extends State<ChatDetail> {
                     _sendMessage('mimi1', 2)
                 ,
                 child: new Image.asset(
-                  'assets/icon/mimi1.gif',
+                  'asset/images/sticker/mimi1.gif',
                   width: 50.0,
                   height: 50.0,
                   fit: BoxFit.cover,
@@ -458,7 +470,7 @@ class _ChatDetailState extends State<ChatDetail> {
                 onPressed: () =>_sendMessage('mimi2', 2)
                 ,
                 child: new Image.asset(
-                  'assets/icon/mimi2.gif',
+                  'asset/images/sticker/mimi2.gif',
                   width: 50.0,
                   height: 50.0,
                   fit: BoxFit.cover,
@@ -467,7 +479,7 @@ class _ChatDetailState extends State<ChatDetail> {
               FlatButton(
                 onPressed: () => _sendMessage('mimi3', 2),
                 child: new Image.asset(
-                  'assets/icon/mimi3.gif',
+                  'asset/images/sticker/mimi3.gif',
                   width: 50.0,
                   height: 50.0,
                   fit: BoxFit.cover,
@@ -481,7 +493,7 @@ class _ChatDetailState extends State<ChatDetail> {
               FlatButton(
                 onPressed: () => _sendMessage('mimi4', 2),
                 child: new Image.asset(
-                  'assets/icon/mimi4.gif',
+                  'asset/images/sticker/mimi4.gif',
                   width: 50.0,
                   height: 50.0,
                   fit: BoxFit.cover,
@@ -490,7 +502,7 @@ class _ChatDetailState extends State<ChatDetail> {
               FlatButton(
                 onPressed: () => _sendMessage('mimi5', 2),
                 child: new Image.asset(
-                  'assets/icon/mimi5.gif',
+                  'asset/images/sticker/mimi5.gif',
                   width: 50.0,
                   height: 50.0,
                   fit: BoxFit.cover,
@@ -499,7 +511,7 @@ class _ChatDetailState extends State<ChatDetail> {
               FlatButton(
                 onPressed: () =>_sendMessage('mimi6', 2),
                 child: new Image.asset(
-                  'assets/icon/mimi6.gif',
+                  'asset/images/sticker/mimi6.gif',
                   width: 50.0,
                   height: 50.0,
                   fit: BoxFit.cover,
@@ -513,7 +525,7 @@ class _ChatDetailState extends State<ChatDetail> {
               FlatButton(
                 onPressed: () => _sendMessage('mimi7', 2),
                 child: new Image.asset(
-                  'assets/icon/mimi7.gif',
+                  'asset/images/sticker/mimi7.gif',
                   width: 50.0,
                   height: 50.0,
                   fit: BoxFit.cover,
@@ -522,7 +534,7 @@ class _ChatDetailState extends State<ChatDetail> {
               FlatButton(
                 onPressed: () =>_sendMessage('mimi8', 2),
                 child: new Image.asset(
-                  'assets/icon/mimi8.gif',
+                  'asset/images/sticker/mimi8.gif',
                   width: 50.0,
                   height: 50.0,
                   fit: BoxFit.cover,
@@ -531,7 +543,7 @@ class _ChatDetailState extends State<ChatDetail> {
               FlatButton(
                 onPressed: () => _sendMessage('mimi9', 2),
                 child: new Image.asset(
-                  'assets/icon/mimi9.gif',
+                  'asset/images/sticker/mimi9.gif',
                   width: 50.0,
                   height: 50.0,
                   fit: BoxFit.cover,
@@ -551,33 +563,34 @@ class _ChatDetailState extends State<ChatDetail> {
   }
 
   Future getImage() async {
-//    imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
-//
-//    if (imageFile != null) {
-//      setState(() {
-//        isLoading = true;
-//      });
-//      uploadFile();
-//    }
+    imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    if (imageFile != null) {
+      setState(() {
+        isLoading = true;
+      });
+      uploadFile();
+    }
   }
   Future uploadFile() async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
 
-//    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-//    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-//    StorageUploadTask uploadTask = reference.putFile(imageFile);
-//    StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
-//    storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
-//      imageUrl = downloadUrl;
-//      setState(() {
-//        isLoading = false;
-//        _sendMessage(imageUrl, 1);
-//      });
-//    }, onError: (err) {
-//      setState(() {
-//        isLoading = false;
-//      });
-//      print( 'This file is not an image');
-//    });
+    StorageReference reference = FirebaseStorage.instance.ref().child(authBloc.userCurrent.uid+'_'+fileName);
+
+    StorageUploadTask uploadTask = reference.putFile(imageFile);
+    StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
+    storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
+      imageUrl = downloadUrl;
+      setState(() {
+        isLoading = false;
+        _sendMessage(imageUrl, 1);
+      });
+    }, onError: (err) {
+      setState(() {
+        isLoading = false;
+      });
+      print( 'This file is not an image');
+    });
   }
   _createnewIdChat() async {
     DocumentReference  docRef= await nodeRoot.collection('chats').add({
@@ -586,6 +599,11 @@ class _ChatDetailState extends State<ChatDetail> {
     return docRef.documentID.toString();
   }
   _sendMessage(String content,int type) async {
+    if(type == 0){
+      myController.clear();
+      chatBloc.feedMessageVal('');
+    }
+
     if(widget.idChat==null){
       var docRef = await _createnewIdChat();
       nodeRoot.collection('chats').document(docRef).updateData({'idChat':docRef});
@@ -647,10 +665,6 @@ class _ChatDetailState extends State<ChatDetail> {
     }
     await nodeRoot.collection('users').document(authBloc.userCurrent.uid)
         .updateData({'idChat': list});
-    if(type == 0){
-      myController.clear();
-      chatBloc.feedMessageVal('');
-    }
 
 
 

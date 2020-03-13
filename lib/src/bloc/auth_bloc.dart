@@ -11,8 +11,9 @@ class AuthBloc{
   final db = Firestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
+  int _typeLogIn=0;
   FirebaseUser userCurrent;
-
+   GoogleSignInAccount googleSignInAccount;
   Future<FirebaseUser> signInWithGoogle(context) async {
     ProgressDialog pr= new ProgressDialog(context,type: ProgressDialogType.Normal, isDismissible: true);
     pr.style(
@@ -30,12 +31,13 @@ class AuthBloc{
             color: Colors.black, fontSize: 19.0, fontWeight: FontWeight.w600)
     );
 
-    final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+    googleSignInAccount = await googleSignIn.signIn();
     final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
     pr.show();
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleSignInAuthentication.accessToken,
       idToken: googleSignInAuthentication.idToken,
+
     );
 
     final AuthResult authResult = await _auth.signInWithCredential(credential);
@@ -46,7 +48,7 @@ class AuthBloc{
 
     final FirebaseUser currentUser = await _auth.currentUser();
     assert(user.uid == currentUser.uid);
-
+    _typeLogIn=1; // 1== google
     await userIsExit(user.uid);
     userCurrent=user;
     pr.dismiss();
@@ -59,15 +61,21 @@ class AuthBloc{
     await db
         .collection('users').document(authID).get().then((documentSnapshot) async {
       if (documentSnapshot.data == null) {
+        if(_typeLogIn==1){
+          UserModel userModel = new UserModel(
+              id:authID,
+              name: googleSignInAccount.displayName,
+              idChat: [],
+              isActive: true,
+              imageAvatarUrl: googleSignInAccount.photoUrl
+          );
+          await addDataUser(userModel.id,userModel.toJson());
+        }
         print('chua co');
-        UserModel userModel = new UserModel(
-            id:authID,
-            name: "Default",
-            idChat: [],
-            isActive: true,
-            imageAvatarUrl: "https://scontent.fhan1-1.fna.fbcdn.net/v/t1.0-9/p960x960/84697154_2516174735316139_945259827255312384_o.jpg?_nc_cat=102&_nc_ohc=6MAbYPZo7E8AX8wLOXk&_nc_ht=scontent.fhan1-1.fna&_nc_tp=6&oh=5be3f9bdbee19c6707d777d0d89c440c&oe=5ECE144E"
-        );
-        await addDataUser(userModel.id,userModel.toJson());
+      }else{
+        if(_typeLogIn==1){
+          await updateDataUserWhenLogin(authID,googleSignInAccount.displayName,googleSignInAccount.photoUrl);
+        }
       }
     });
   }
@@ -112,6 +120,17 @@ class AuthBloc{
       print("Update data User error" + e );
     });
   }
+
+  Future<void> updateDataUserWhenLogin(String authID,String name, String ava) async {
+    await db
+        .collection('users')
+        .document(authID)
+        .updateData({'name': name,'isActive': true,'imageAvatarUrl':ava})
+        .catchError((e) {
+      print("Update data User error" + e );
+    });
+  }
+
 
   Future<void> deleteData(authID) async {
     await db

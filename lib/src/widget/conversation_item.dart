@@ -1,5 +1,7 @@
+import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/src/widget/video_call_page.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import '../bloc/auth_bloc.dart';
@@ -92,6 +94,15 @@ class _ConversationItemState extends State<ConversationItem> {
                    color: Colors.grey.shade300,
                    shape: BoxShape.circle,
                  ),
+                 onTap: (){
+                   Navigator.push(context, MaterialPageRoute(
+                       builder: (context) => VideoCallPage(
+                         idFriend: idFriend,
+                         urlImageFriend: _urlImg,
+                         fiendName: _friendName,
+                       )
+                   ));
+                 },
                  child: Icon(
                    Icons.videocam,
                    color: Colors.black,
@@ -159,7 +170,103 @@ class _ConversationItemState extends State<ConversationItem> {
             .snapshots() ,
         builder: (context,snapshotFriend){
           if(!snapshotFriend.hasData){
-            return Container();
+            if(_friendName!=null )
+               return Row(
+              children: <Widget>[
+                Stack(
+                  children: <Widget>[
+                    Container(
+                      height: 60,
+                      width: 60,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30.0),
+                          image: DecorationImage(
+                              image: NetworkImage(_urlImg),
+                              fit: BoxFit.cover
+                          )
+                      ),
+                    ),
+                    Visibility(
+                      visible: _isActive,
+                      child: Container(
+                        height: 60,
+                        width: 60,
+                        child: Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: Container(
+                              height: 12,
+                              width: 12,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                  color:Colors.green
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ) ,
+                  ],
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          _friendName,
+                          style: TextStyle(
+                              fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: <Widget>[
+                                  Flexible(
+                                    child: _buildLatestMessage(),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 5),
+                                    child: Text(readTimestamp(widget.datas['timestamp']),
+                                        style: TextStyle(color: Colors.grey.shade700, fontSize: 11)),
+                                  )
+                                ],
+                              ),
+                            ),
+                            Visibility(
+                              visible:!widget.datas["check"],
+                              child: Padding(
+                                padding: EdgeInsets.only(left: 5),
+                                child: Container(
+                                  height: 10,
+                                  width: 10,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30.0),
+                                      color:Colors.blueAccent
+                                  ),
+                                ),
+                              ),
+                            )
+
+                          ],
+                        )
+
+
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            );
+            else
+              return Container();
           }
           else{
             _friendName=snapshotFriend.data.documents[0]['name'].toString();
