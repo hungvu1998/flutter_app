@@ -8,6 +8,7 @@ import 'package:flutter_app/src/model/user_model.dart';
 import 'package:flutter_app/src/widget/profile.dart';
 import 'package:flutter_app/src/widget/profile_clipper.dart';
 import 'package:flutter_app/src/widget/search_page.dart';
+import 'package:flutter_app/src/widget/stories_list.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -46,7 +47,9 @@ class _ChatPageState extends State<ChatPage> {
   void onFocusChange() {
     if (focusNode.hasFocus) {
       Navigator.push(context, MaterialPageRoute(
-          builder: (context) => SearchPage()
+          builder: (context) => SearchPage(
+            userCurrent: widget.userModel,
+          )
       ));
     }
   }
@@ -106,16 +109,14 @@ class _ChatPageState extends State<ChatPage> {
               _buildAppBarMessage(),
               Expanded(
                 child: ListView.builder(
-                  padding: EdgeInsets.only(top: 10.0),
+                  padding: EdgeInsets.only(top: 3.0),
                   itemCount: widget.userModel.idChat.length + 2,
                   itemBuilder: (context,index){
                     if(index == 0){
                       return _buildSearchBar();
                     }
                     else if(index == 1){
-                      return Container(
-
-                      );
+                      return _buildStoriesList(widget.userModel);
                     }
                     else
                       return
@@ -130,7 +131,6 @@ class _ChatPageState extends State<ChatPage> {
                           }
                           else{
                             return ConversationItem(
-
                               datas: snapshotChat.data.documents[0],
                               idChat:  widget.userModel.idChat[index-2].toString(),
                               listIdChat: widget.userModel.idChat,
@@ -232,7 +232,9 @@ class _ChatPageState extends State<ChatPage> {
             child: InkWell(
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => SearchPage()
+                    builder: (context) => SearchPage(
+                      userCurrent: widget.userModel,
+                    )
                 ));
               },
               child: Container(
@@ -308,6 +310,15 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
+
+  _buildStoriesList(datas) {
+    return Container(
+      height: 100,
+      padding: EdgeInsets.only(top: 10.0),
+      child: StoriesList(user: datas,),
+    );
+  }
+
 
   @override
   void dispose() {

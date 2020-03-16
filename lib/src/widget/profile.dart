@@ -65,7 +65,7 @@ class _ProfileState extends State<Profile> {
                       SizedBox(height: 10.0),
                       Center(
                         child: Text(
-                          'fb.com/hungvu98',
+                          authBloc.userCurrent.displayName,
                           style: TextStyle(
                             fontSize: 22.0,
                             color: Colors.black,

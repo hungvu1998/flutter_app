@@ -25,17 +25,18 @@ class _ConversationItemState extends State<ConversationItem> {
   var _timestamp;
 
   @override
-  void initState() {
-    _getIDfriend();
+  void initState()  {
+
     super.initState();
   }
 
 
   @override
   Widget build(BuildContext context) {
+    getId();
      return InkWell(
        onTap: (){
-         if(_urlImg!=null&& _friendName!=null && _isActive!=null){
+         if(_urlImg!=null&& _friendName!=null && _isActive!=null && idFriend!=null){
            Navigator.push(context, MaterialPageRoute(
                builder: (context) => ChatDetail(
                  urlImg: _urlImg,
@@ -48,7 +49,7 @@ class _ConversationItemState extends State<ConversationItem> {
            ));
          }
        },
-       child:  Padding(
+       child: idFriend==null ? Container():  Padding(
          padding: const EdgeInsets.symmetric(vertical: 12.0),
          child: Slidable(
            actionPane: SlidableDrawerActionPane(),
@@ -95,13 +96,15 @@ class _ConversationItemState extends State<ConversationItem> {
                    shape: BoxShape.circle,
                  ),
                  onTap: (){
-                   Navigator.push(context, MaterialPageRoute(
-                       builder: (context) => VideoCallPage(
-                         idFriend: idFriend,
-                         urlImageFriend: _urlImg,
-                         fiendName: _friendName,
-                       )
-                   ));
+                   if(idFriend!=null){
+                     Navigator.push(context, MaterialPageRoute(
+                         builder: (context) => VideoCallPage(
+                           idFriend: idFriend,
+                           urlImageFriend: _urlImg,
+                           fiendName: _friendName,
+                         )
+                     ));
+                   }
                  },
                  child: Icon(
                    Icons.videocam,
@@ -161,17 +164,16 @@ class _ConversationItemState extends State<ConversationItem> {
   }
 
   _buildItemChat(){
+    return StreamBuilder(
+      stream:nodeRoot
+          .collection('users')
+          .where("id", isEqualTo: idFriend )
+          .snapshots() ,
+      builder: (context,snapshotFriend){
 
-    if(idFriend!=null)
-      return StreamBuilder(
-        stream:nodeRoot
-            .collection('users')
-            .where("id", isEqualTo: idFriend )
-            .snapshots() ,
-        builder: (context,snapshotFriend){
-          if(!snapshotFriend.hasData){
-            if(_friendName!=null )
-               return Row(
+        if(!snapshotFriend.hasData){
+          if(_friendName!=null )
+            return Row(
               children: <Widget>[
                 Stack(
                   children: <Widget>[
@@ -265,113 +267,112 @@ class _ConversationItemState extends State<ConversationItem> {
                 )
               ],
             );
-            else
-              return Container();
-          }
-          else{
-            _friendName=snapshotFriend.data.documents[0]['name'].toString();
-            _isActive=snapshotFriend.data.documents[0]['isActive'];
-            _urlImg=snapshotFriend.data.documents[0]['imageAvatarUrl'];
-            _friendName=snapshotFriend.data.documents[0]['name'];
-            return Row(
-              children: <Widget>[
-                Stack(
-                  children: <Widget>[
-                    Container(
-                      height: 60,
-                      width: 60,
-                      decoration: BoxDecoration(
+          else
+            return Container();
+        }
+        else{
+          _friendName=snapshotFriend.data.documents[0]['name'].toString();
+          _isActive=snapshotFriend.data.documents[0]['isActive'];
+          _urlImg=snapshotFriend.data.documents[0]['imageAvatarUrl'];
+          _friendName=snapshotFriend.data.documents[0]['name'];
+          return Row(
+            children: <Widget>[
+              Stack(
+                children: <Widget>[
+                  Container(
+                    height: 60,
+                    width: 60,
+                    decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30.0),
                         image: DecorationImage(
-                          image: NetworkImage(snapshotFriend.data.documents[0]['imageAvatarUrl']),
-                          fit: BoxFit.cover
+                            image: NetworkImage(snapshotFriend.data.documents[0]['imageAvatarUrl']),
+                            fit: BoxFit.cover
                         )
-                      ),
-                    ),
-                    Visibility(
-                      visible: snapshotFriend.data.documents[0]['isActive'],
-                      child: Container(
-                        height: 60,
-                        width: 60,
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Align(
-                            alignment: Alignment.bottomRight,
-                            child: Container(
-                              height: 12,
-                              width: 12,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30.0),
-                                  color:Colors.green
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ) ,
-                  ],
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          snapshotFriend.data.documents[0]['name'],
-                          style: TextStyle(
-                              fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
-                            Expanded(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: <Widget>[
-                                  Flexible(
-                                    child: _buildLatestMessage(),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 5),
-                                    child: Text(readTimestamp(widget.datas['timestamp']),
-                                        style: TextStyle(color: Colors.grey.shade700, fontSize: 11)),
-                                  )
-                                ],
-                              ),
-                            ),
-                            Visibility(
-                              visible:!widget.datas["check"],
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 5),
-                                child: Container(
-                                  height: 10,
-                                  width: 10,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(30.0),
-                                      color:Colors.blueAccent
-                                  ),
-                                ),
-                              ),
-                            )
-
-                          ],
-                        )
-
-
-                      ],
                     ),
                   ),
-                )
-              ],
-            );
-          }
-        },
-      );
-    else
-      return Container();
+                  Visibility(
+                    visible: snapshotFriend.data.documents[0]['isActive'],
+                    child: Container(
+                      height: 60,
+                      width: 60,
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Container(
+                            height: 12,
+                            width: 12,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30.0),
+                                color:Colors.green
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ) ,
+                ],
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        snapshotFriend.data.documents[0]['name'],
+                        style: TextStyle(
+                            fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: <Widget>[
+                                Flexible(
+                                  child: _buildLatestMessage(),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 5),
+                                  child: Text(readTimestamp(widget.datas['timestamp']),
+                                      style: TextStyle(color: Colors.grey.shade700, fontSize: 11)),
+                                )
+                              ],
+                            ),
+                          ),
+                          Visibility(
+                            visible:!widget.datas["check"],
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 5),
+                              child: Container(
+                                height: 10,
+                                width: 10,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(30.0),
+                                    color:Colors.blueAccent
+                                ),
+                              ),
+                            ),
+                          )
+
+                        ],
+                      )
+
+
+                    ],
+                  ),
+                ),
+              )
+            ],
+          );
+        }
+      },
+    );
+
   }
 
 
@@ -386,14 +387,20 @@ class _ConversationItemState extends State<ConversationItem> {
         _isThatYou ? "Bạn: "+widget.datas["content"]: widget.datas["content"],
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: widget.datas["check"] ? Colors.grey.shade700 : Colors.black, fontSize: 16,fontWeight:  widget.datas["check"] ?  null :  FontWeight.bold,),
-    ) : Text(
-      'f'
+    ) : widget.datas['type']==2 ? Text(
+      _isThatYou ? "Bạn: Sticker": 'Sticker',
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(color: widget.datas["check"] ? Colors.grey.shade700 : Colors.black, fontSize: 16,fontWeight:  widget.datas["check"] ?  null :  FontWeight.bold,),
+    ): Text(
+      _isThatYou ? "Bạn: Image": 'Image',
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(color: widget.datas["check"] ? Colors.grey.shade700 : Colors.black, fontSize: 16,fontWeight:  widget.datas["check"] ?  null :  FontWeight.bold,),
     );
   }
   String readTimestamp(int timestamp) {
     var now = new DateTime.now();
     var format = new DateFormat('HH:mm a');
-    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp);
     var diff = now.difference(date);
     var time = '';
 
@@ -417,12 +424,20 @@ class _ConversationItemState extends State<ConversationItem> {
     return time;
   }
 
-  Future<String> _getIDfriend() async {
+  Future<String> getId() async {
     if(widget.datas['idFrom'].toString().trim() == authBloc.userCurrent.uid){
-      idFriend= widget.datas["idTo"].toString();
+
+      setState(() {
+        idFriend= widget.datas["idTo"].trim().toString();
+      });
+
+      return  widget.datas["idTo"].trim().toString();
     }
     else{
-      idFriend= widget.datas["idFrom"].toString();
+      setState(() {
+        idFriend= widget.datas["idFrom"].trim().toString();
+      });
+      return  widget.datas["idFrom"].trim().toString();
     }
   }
 }

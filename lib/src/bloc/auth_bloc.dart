@@ -66,12 +66,12 @@ class AuthBloc{
               id:authID,
               name: googleSignInAccount.displayName,
               idChat: [],
+              listFriend: [],
               isActive: true,
               imageAvatarUrl: googleSignInAccount.photoUrl
           );
           await addDataUser(userModel.id,userModel.toJson());
         }
-        print('chua co');
       }else{
         if(_typeLogIn==1){
           await updateDataUserWhenLogin(authID,googleSignInAccount.displayName,googleSignInAccount.photoUrl);

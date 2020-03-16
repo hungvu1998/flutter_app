@@ -23,6 +23,7 @@ class ChatDetail extends StatefulWidget {
   final bool isActive;
   final String idFriend;
   final List<String> listIdChat;
+
   //final List<String> listIdChatFriend;
   ChatDetail({Key key, this.idChat,this.urlImg,this.friendName,this.idFriend,this.isActive,this.listIdChat}) : super(key: key);
 
@@ -35,6 +36,7 @@ class _ChatDetailState extends State<ChatDetail> {
   bool isShowSticker;
   File imageFile;
   bool isLoading;
+  String _contentChat='';
   String imageUrl;
   final Firestore nodeRoot = Firestore.instance;
   final FocusNode focusNode = new FocusNode();
@@ -103,7 +105,8 @@ class _ChatDetailState extends State<ChatDetail> {
               Column(
                 children: <Widget>[
                   _buildAppBar(),
-                  widget.idChat!=null?Expanded(
+                  widget.idChat.trim().isNotEmpty
+                      ?Expanded(
                     child: StreamBuilder(
                       stream: nodeRoot
                           .collection('chats/' + widget.idChat + '/message')
@@ -370,6 +373,10 @@ class _ChatDetailState extends State<ChatDetail> {
                     controller: myController,
                     focusNode: focusNode,
                     onChanged: (value) {
+                      setState(() {
+                        _contentChat=value.toString();
+                      });
+
                       chatBloc.feedMessageVal(value);
                     },
                     decoration: InputDecoration(
@@ -411,38 +418,59 @@ class _ChatDetailState extends State<ChatDetail> {
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: StreamBuilder(
-              stream: chatBloc.recieveChatMessageVal,
-              initialData: '',
-              builder: (context,snapshot){
-                String _chatMessage = snapshot.data;
-                if(_chatMessage!= null && _chatMessage.trim()!= ''){
-
-                  return IconButton(
-                    onPressed:() {
-                      _sendMessage(_chatMessage, 0);
-                      _chatMessage='';
-                    },
-                    icon: Icon(
-                      Icons.send,
-                      size: 25.0,
-                      color: Colors.lightBlue,
-                    ),
-                  );
-                }
-                else
-                  return IconButton(
-                    onPressed: (){
-                      _sendMessage("like", 2);
-                    },
-                    icon: Icon(
-                      FontAwesomeIcons.solidThumbsUp,
-                      size: 25.0,
-                      color: Colors.lightBlue,
-                    ),
-                  );
+            child: _contentChat.trim().toString().isEmpty
+            ? IconButton(
+              onPressed: (){
+                _sendMessage('like', 2);
               },
+              icon: Icon(
+                FontAwesomeIcons.solidThumbsUp,
+                size:25.0,
+                color:Colors.blue
+              ),
+
+            ): IconButton(
+              onPressed: (){
+                _sendMessage(_contentChat.toString(), 0);
+              },
+              icon: Icon(
+                  Icons.send,
+                  size:25.0,
+                  color:Colors.blue
+              ),
             ),
+//            child: StreamBuilder(
+//              stream: chatBloc.recieveChatMessageVal,
+//              initialData: '',
+//              builder: (context,snapshot){
+//                if(snapshot.hasData && snapshot.data.toString().trim().isNotEmpty){
+//                  String _chatMessage = snapshot.data;
+//                  print('hello' +_chatMessage);
+//                  return IconButton(
+//                    onPressed:() {
+//                      _sendMessage(_chatMessage, 0);
+//                      _chatMessage='';
+//                    },
+//                    icon: Icon(
+//                      Icons.send,
+//                      size: 25.0,
+//                      color: Colors.lightBlue,
+//                    ),
+//                  );
+//                }
+//                else
+//                  return IconButton(
+//                    onPressed: (){
+//                      _sendMessage("like", 2);
+//                    },
+//                    icon: Icon(
+//                      FontAwesomeIcons.solidThumbsUp,
+//                      size: 25.0,
+//                      color: Colors.lightBlue,
+//                    ),
+//                  );
+//              },
+//            ),
           )
         ],
       ),
@@ -604,7 +632,7 @@ class _ChatDetailState extends State<ChatDetail> {
       chatBloc.feedMessageVal('');
     }
 
-    if(widget.idChat==null){
+    if(widget.idChat.trim().isEmpty){
       var docRef = await _createnewIdChat();
       nodeRoot.collection('chats').document(docRef).updateData({'idChat':docRef});
 
@@ -614,8 +642,8 @@ class _ChatDetailState extends State<ChatDetail> {
 //    for(var item in widget.listIdChatFriend) {
 //      newListIdChatFriend.add(item);
 //    }
-      nodeRoot.collection('users').document(widget.idFriend).updateData({'idChat':FieldValue.arrayUnion([docRef as String])});
-      nodeRoot.collection('users').document(authBloc.userCurrent.uid).updateData({'idChat':FieldValue.arrayUnion([docRef as String])});
+      nodeRoot.collection('users').document(widget.idFriend).updateData({'idChat':FieldValue.arrayUnion([docRef as String]),'listFriend':FieldValue.arrayUnion([authBloc.userCurrent.uid])});
+      nodeRoot.collection('users').document(authBloc.userCurrent.uid).updateData({'idChat':FieldValue.arrayUnion([docRef as String]),'listFriend':FieldValue.arrayUnion([widget.idFriend])});
 
 
       nodeRoot.collection('chats/' +docRef + '/message').add({
@@ -626,6 +654,10 @@ class _ChatDetailState extends State<ChatDetail> {
         'idTo':widget.idFriend.toString(),
         'type':type,
 
+      }).then((value){
+        setState(() {
+          _contentChat='';
+        });
       });
 
       setState(() {
@@ -641,6 +673,10 @@ class _ChatDetailState extends State<ChatDetail> {
         'idFrom':authBloc.userCurrent.uid,
         'idTo':widget.idFriend.toString(),
         'type':type,
+      }).then((value){
+        setState(() {
+          _contentChat='';
+        });
       });
     }
 
@@ -668,6 +704,12 @@ class _ChatDetailState extends State<ChatDetail> {
 
 
 
+  }
+  @override
+  void dispose() {
+
+   // chatBloc.dispose();
+    super.dispose();
   }
 
 

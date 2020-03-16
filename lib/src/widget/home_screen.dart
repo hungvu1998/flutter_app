@@ -3,9 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/src/bloc/auth_bloc.dart';
+import 'package:flutter_app/src/bloc/chat_bloc.dart';
 import 'package:flutter_app/src/model/user_model.dart';
 import 'package:flutter_app/src/widget/chat_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import 'list_chanel.dart';
+import 'list_story.dart';
 
 class HomeScreen extends StatefulWidget {
 
@@ -18,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    chatBloc.getStories(authBloc.userCurrent.uid);
   }
   @override
   Widget build(BuildContext context) {
@@ -32,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
             var userModel =  new UserModel(
                 id: snapshot.data.documents[0]['id'],
                 name: snapshot.data.documents[0]['name'],
-               // listFriend: snapshot.data.documents[0]['listFriend'].cast<String>(),
+                listFriend: snapshot.data.documents[0]['listFriend'].cast<String>(),
                 idChat: snapshot.data.documents[0]['idChat'].cast<String>(),
                 isActive: snapshot.data.documents[0]['isActive'],
                 imageAvatarUrl:  snapshot.data.documents[0]['imageAvatarUrl']);
@@ -46,12 +51,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         userModel: userModel,
                       ),
-                      ChatPage(
-                        userModel: userModel,
-                      ),
-                      ChatPage(
-                        userModel: userModel,
-                      ),
+                      //Container(),
+                      ListStory(userModel: userModel,),
+                      ListChannel(),
                     ],
                   ),
                 ),

@@ -3,16 +3,18 @@ class UserModel {
   String imageAvatarUrl;
   String name;
   List<String> idChat;
+  List<String>listFriend;
   bool isActive;
   String token;
 
-  UserModel({this.id, this.imageAvatarUrl, this.name,this.idChat,this.isActive,this.token});
+  UserModel({this.id, this.imageAvatarUrl, this.name,this.idChat,this.listFriend,this.isActive,this.token});
   Map<String, dynamic> toJson() =>
       {
         'id': id,
         'imageAvatarUrl': imageAvatarUrl,
         'name':name,
         'idChat':idChat,
+        'listFriend':listFriend,
         'isActive':isActive,
         'token' : token
       };
