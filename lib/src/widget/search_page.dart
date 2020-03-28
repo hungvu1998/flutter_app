@@ -33,7 +33,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     subject.stream
-        .debounce(new Duration(milliseconds: 600))
+        .debounceTime(new Duration(milliseconds: 600))
         .listen(_textChanged);
     super.initState();
   }

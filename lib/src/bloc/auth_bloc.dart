@@ -90,6 +90,7 @@ class AuthBloc{
     return false;
   }
 
+
   Future<bool> logout() async {
     await _auth.signOut();
     await googleSignIn.signOut();

@@ -9,6 +9,7 @@ import 'package:flutter_app/src/widget/profile.dart';
 import 'package:flutter_app/src/widget/profile_clipper.dart';
 import 'package:flutter_app/src/widget/search_page.dart';
 import 'package:flutter_app/src/widget/stories_list.dart';
+import 'package:flutter_app/src/widget/test_arCamera.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -194,9 +195,18 @@ class _ChatPageState extends State<ChatPage> {
                     borderRadius: BorderRadius.circular(20),
                     color: Colors.grey.shade200,
                   ),
-                  child: Icon(
-                    FontAwesomeIcons.camera,
-                    size: 18.0,
+                  child: InkWell(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => ArCameraPage(
+
+                          )
+                      ));
+                    },
+                    child: Icon(
+                      FontAwesomeIcons.camera,
+                      size: 18.0,
+                    ),
                   ),
                 ),
               ),
