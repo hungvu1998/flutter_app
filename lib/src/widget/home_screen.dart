@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
           connectivityStatus = result.toString();
           if (result == ConnectivityResult.none) {
             noInternetDialog(context);
+          }else{
           }
         });
   }
@@ -100,5 +101,9 @@ class _HomeScreenState extends State<HomeScreen> {
         }
     );
   }
-
+@override
+  void dispose() {
+   connectivitySubs?.cancel();
+    super.dispose();
+  }
 }

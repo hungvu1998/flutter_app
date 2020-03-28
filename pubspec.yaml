@@ -43,6 +43,7 @@ dependencies:
   arcore_flutter_plugin: ^0.0.5+1
   connectivity: ^0.4.8+2
   flutter_blue: ^0.6.3+1
+  flutter_bluetooth_serial: ^0.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
